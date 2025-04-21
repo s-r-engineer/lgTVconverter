@@ -64,7 +64,7 @@ def get_stream_info(input_file: str) -> List[dict]:
         input_file
     ]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True, encoding="utf-8")
         data = json.loads(result.stdout)
 
         if 'streams' not in data:
@@ -433,11 +433,12 @@ def main() -> None:
     )
 
     try:
-        # Get all files and filter video files
         files = []
-        for f in dir_to_process.rglob("*"):
-            if f.is_file() and is_video_file(f):
-                files.append(str(f))
+        for root, dirs, filenames in os.walk(dir_to_process):
+            for filename in filenames:
+                file_path = os.path.join(root, filename)
+                if is_video_file(file_path):
+                    files.append(file_path)
 
         if not files:
             logging.warning(f"No video files found in '{dir_to_process}'")
